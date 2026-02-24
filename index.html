@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduShop | GA4 Ecommerce Demo</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQMDD3LYBM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Standard Page View (Automatic)
+      gtag('config', 'G-EQMDD3LYBM', { 'debug_mode': true });
+    </script>
+
+    <style>
+        :root { --primary: #2563eb; --secondary: #64748b; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 1000px; margin: auto; }
+        header { text-align: center; padding: 2rem 0; }
+        
+        /* Filter Section */
+        .controls { background: white; padding: 15px; border-radius: 8px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ddd; font-size: 1rem; }
+
+        /* Product Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 12px; padding: 20px; transition: transform 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; position: relative; }
+        .card:hover { transform: translateY(-5px); border: 2px solid var(--primary); }
+        .category-badge { font-size: 0.75rem; background: #e2e8f0; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; color: var(--secondary); }
+        h3 { margin: 10px 0; font-size: 1.25rem; }
+        .price { font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
+        
+        button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #1d4ed8; }
+        
+        /* Debug Console Simulation */
+        #log { margin-top: 40px; padding: 15px; background: #1e293b; color: #34d399; border-radius: 8px; font-family: monospace; font-size: 0.9rem; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>EduShop Demo Store</h1>
+        <p>Google Analytics 4 Ecommerce Event Tracking Test Page</p>
+    </header>
+
+    <div class="controls">
+        <label for="categoryFilter">Filter by Category:</label>
+        <select id="categoryFilter" onchange="filterProducts()">
+            <option value="All">All Products</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Accessories">Accessories</option>
+        </select>
+    </div>
+
+    <div class="grid" id="productGrid">
+        </div>
+
+    <div id="log">>> Interaction Log: Waiting for user action...</div>
+</div>
+
+<script>
+    // 2. DUMMY PRODUCT DATA
+    const products = [
+        { id: 'p1', name: 'Quantum Headphones', price: 299, category: 'Electronics' },
+        { id: 'p2', name: 'Cotton Minimalist Tee', price: 35, category: 'Fashion' },
+        { id: 'p3', name: 'Smart Leather Wallet', price: 85, category: 'Accessories' },
+        { id: 'p4', name: 'Ultra-Wide Monitor', price: 450, category: 'Electronics' },
+        { id: 'p5', name: 'Canvas Backpack', price: 65, category: 'Accessories' }
+    ];
+
+    // 3. TRACKING FUNCTIONS (The Core of the Demo)
+
+    // Function to log actions to the on-screen console for students to see
+    function debugLog(message) {
+        const log = document.getElementById('log');
+        log.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}<br>` + log.innerHTML;
+    }
+
+    // A: Track Product Selection (View Item)
+    function trackProductView(product) {
+        debugLog(`GA4 Event: <b>view_item</b> - Name: ${product.name}`);
+        
+        gtag('event', 'view_item', {
+            currency: 'USD',
+            value: product.price,
+            items: [{
+                item_id: product.id,
+                item_name: product.name,
+                item_category: product.category,
+                price: product.price
+            }]
+        });
+    }
+
+    // B: Track Add to Cart
+    function trackAddToCart(event, product) {
+        event.stopPropagation(); // Prevents triggering the card click (product view)
+        debugLog(`GA4 Event: <b>add_to_cart</b> - Item: ${product.name}`);
+        
+        gtag('event', 'add_to_cart', {
+            currency: 'USD',
+            value: product.price,
+            items: [{
+                item_id: product.id,
+                item_name: product.name,
+                item_category: product.category,
+                price: product.price,
+                quantity: 1
+            }]
+        });
+        alert(`${product.name} added to cart!`);
+    }
+
+    // C: Track Category Filtering
+    function filterProducts() {
+        const category = document.getElementById('categoryFilter').value;
+        debugLog(`GA4 Event: <b>select_content</b> - Category: ${category}`);
+        
+        gtag('event', 'select_content', {
+            content_type: 'product_category',
+            content_id: category
+        });
+        
+        renderProducts(category);
+    }
+
+    // 4. RENDERING LOGIC
+    function renderProducts(filter = 'All') {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        
+        const filtered = filter === 'All' ? products : products.filter(p => p.category === filter);
+        
+        filtered.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => trackProductView(product);
+            
+            card.innerHTML = `
+                <span class="category-badge">${product.category}</span>
+                <h3>${product.name}</h3>
+                <p class="price">$${product.price}</p>
+                <button onclick="trackAddToCart(event, ${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                    Add to Cart
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Initialize the page
+    renderProducts();
+</script>
+
+</body>
+</html>
